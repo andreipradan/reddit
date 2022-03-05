@@ -1,6 +1,9 @@
 import asyncio
 import json
 import logging
+import signal
+import socket
+import sys
 
 import dotenv
 import requests
@@ -11,10 +14,17 @@ logging.basicConfig(format="%(asctime)s - %(levelname)s:%(name)s - %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+config = dotenv.dotenv_values()
 
-def get_socket_url(info_url):
+bot = telegram.Bot(token=config["TOKEN"])
+chat_id = config["CHAT_ID"]
+debug_chat_id = config["DEBUG_CHAT_ID"]
+host_name = socket.gethostname()
+
+
+def get_socket_url():
     logger.debug("Fetching socket url...")
-    response = requests.get(info_url, headers={'User-agent': 'reddit-live-telegram-bot'})
+    response = requests.get(config["INFO_URL"], headers={'User-agent': 'reddit-live-telegram-bot'})
     if response.status_code == 429:
         return logger.error(f"Got 429: {response.json()['message']}")
 
@@ -23,7 +33,7 @@ def get_socket_url(info_url):
     return url
 
 
-async def websocket(bot, chat_id, socket_url):
+async def websocket(socket_url):
     async with websockets.connect(socket_url) as socket:
         logger.info("Connected to live thread!")
         last_payload, last_update = None, None
@@ -44,18 +54,21 @@ async def websocket(bot, chat_id, socket_url):
                 break
 
 
+def handle_sigterm(*_):
+    stopped_message = f"[{host_name}] Socket stopped"
+    bot.send_message(chat_id=debug_chat_id, text=stopped_message)
+    logger.warning(stopped_message)
+    sys.exit(0)
+
+
 def start():
-    config = dotenv.dotenv_values()
-    bot = telegram.Bot(token=config["TOKEN"])
-    chat_id = config["CHAT_ID"]
-    debug_chat_id = config["DEBUG_CHAT_ID"]
-    socket_url = get_socket_url(config["INFO_URL"])
+    signal.signal(signal.SIGTERM, handle_sigterm)
+    socket_url = get_socket_url()
     if not socket_url:
         return bot.send_message(chat_id=debug_chat_id, text="Could not fetch web socket URL")
 
+    bot.send_message(chat_id=debug_chat_id, text=f"[{host_name}] Socket started")
     try:
-        bot.send_message(chat_id=debug_chat_id, text="Socket started")
-        asyncio.get_event_loop().run_until_complete(websocket(bot, chat_id, socket_url))
+        asyncio.get_event_loop().run_until_complete(websocket(socket_url))
     except KeyboardInterrupt:
-        bot.send_message(chat_id=debug_chat_id, text="Socket stopped")
-        logger.info("Done")
+        handle_sigterm()

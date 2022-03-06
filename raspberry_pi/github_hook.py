@@ -32,7 +32,11 @@ def set_url():
     g = github.Github(token)
     hook_config = {
         "name": "web",
-        "config": {"url": f"{get_ngrok_url()}/github/", "content_type": "json"},
+        "config": {
+            "url": f"{get_ngrok_url()}/github/",
+            "content_type": "json",
+            "secret": env["GITHUB_SECRET"],
+        },
         "events": ["push"],
         "active": True,
     }

@@ -7,7 +7,7 @@ import subprocess
 import dotenv
 import telegram
 import uvicorn
-from fastapi import FastAPI, status, Request
+from fastapi import FastAPI, status, Request, HTTPException
 
 from reddit.settings import LOGGING_FORMAT
 
@@ -48,10 +48,11 @@ async def add_item(request: Request):
 
     if not validate_signature(await request.body(), config["GITHUB_SECRET"], request.headers):
         logger.error(f"Invalid signature")
-        return bot.send_message(
+        bot.send_message(
             chat_id=chat_id,
             text=f"[{host_name}] Got bad signature in request"
         )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid signature")
 
     logger.info("Got new updates")
     output = run_cmd("git pull")

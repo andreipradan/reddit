@@ -24,4 +24,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 fastapi = 'reddit.fastapi:start'
 set-cd = 'raspberry_pi.continuous_deployment:setup'
+show-logs = 'raspberry_pi.continuous_deployment:show_logs'
 websocket = 'reddit.websocket:start'

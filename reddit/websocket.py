@@ -33,6 +33,13 @@ def get_socket_url():
     return url
 
 
+def handle_sigterm(*_):
+    stopped_message = f"[{host_name}] Socket stopped"
+    bot.send_message(chat_id=debug_chat_id, text=stopped_message)
+    logger.warning(stopped_message)
+    sys.exit(0)
+
+
 async def websocket(socket_url):
     async with websockets.connect(socket_url) as socket:
         logger.info("Connected to live thread!")
@@ -52,13 +59,6 @@ async def websocket(socket_url):
                 logger.warning(text)
                 bot.send_message(chat_id=chat_id, text=text, disable_notification=True)
                 break
-
-
-def handle_sigterm(*_):
-    stopped_message = f"[{host_name}] Socket stopped"
-    bot.send_message(chat_id=debug_chat_id, text=stopped_message)
-    logger.warning(stopped_message)
-    sys.exit(0)
 
 
 def start():

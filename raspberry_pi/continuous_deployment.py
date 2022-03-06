@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 def setup():
     run_cmd("sudo ./raspberry_pi/set-services.sh", silent=False)
     set_url()
-    logger.info("Completed")
+    logger.info("Completed setup, showing logs. CTRL+C to terminate")
+    show_logs()
 
 
 def show_logs():

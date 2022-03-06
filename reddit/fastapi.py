@@ -48,7 +48,6 @@ async def add_item(request: Request):
 
     if not validate_signature(await request.body(), config["GITHUB_SECRET"], request.headers):
         logger.error(f"Invalid signature")
-        breakpoint()
         return bot.send_message(
             chat_id=chat_id,
             text=f"[{host_name}] Got bad signature in request"

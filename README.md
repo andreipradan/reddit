@@ -10,44 +10,23 @@ poetry run websocket  # starting the websocket
 ```
 
 ### Local automatic deployments on raspberry pi
+`sudo raspberry-pi/setup-continuous-deployment.sh`
 
-#### Steps
-1. Create your new service
+What happens in the background:
+1. Copies the reddit, ngrok and fastapi service files from /raspberry-pi into /etc/systemd/system
+2. Reloads the service files to include the new services.
+3. Starts the new services
+
+You can check your status by doing
+
 ```
-sudo nano /etc/systemd/system/reddit.service
-```
-
-2. Paste the following contents into the `reddit.service` file
-```
-[Unit]
-Description=Reddit live thread to telegram
-
-[Service]
-User=pi
-WorkingDirectory=/home/pi/projects/reddit
-ExecStart=/home/pi/.poetry/bin/poetry run websocket
-Restart=always
-
-
-[Install]
-WantedBy=multi-user.target
+sudo systemctl status fastapi.service
+sudo systemctl status ngrok.service
+sudo systemctl status reddit.service
 ```
 
-3. Reload the service files to include the new service.
-
-`sudo systemctl daemon reload`
-4. Start your service
-
-`sudo systemctl start reddit.service`
-5. Check service status
-
-`sudo systemctl status reddit.service`
-6. Setup and start [ngrok](https://ngrok.com/) on port 7777
-
-`ngrok http 7777`
-
-7. Add [a new github webhook](https://github.com/andreipradan/reddit/settings/hooks/) (you might need to fork this repo)
-8. Add your public URL provided by ngrok as the Payload URL with the `/github/` suffix
+8. Add [a new github webhook](https://github.com/andreipradan/reddit/settings/hooks/) (you might need to fork this repo)
+9. Add your public URL provided by ngrok as the Payload URL with the `/github/` suffix
 e.g. if ngrok provides this url `https://abcd-efgh-ijkl.ngrok.io` the Payload URL will be `https://abcd-efgh-ijkl.ngrok.io/github/`
-9. Start the Fastapi web server that listens to the github webhook requests
-10. Enjoy!
+10. Start the Fastapi web server that listens to the github webhook requests
+11. Enjoy!

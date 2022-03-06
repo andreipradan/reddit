@@ -1,0 +1,11 @@
+[Unit]
+Description=Ngrok public URL service
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/projects/reddit
+ExecStart=ngrok http 7777
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

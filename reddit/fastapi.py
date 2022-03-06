@@ -3,16 +3,16 @@ import hmac
 import logging
 import socket
 import subprocess
-from typing import Optional
 
 import dotenv
 import telegram
 import uvicorn
 from fastapi import FastAPI, status, Request
 
+from reddit.settings import LOGGING_FORMAT
 
 app = FastAPI()
-logging.basicConfig(format="%(asctime)s - %(levelname)s:%(name)s - %(message)s")
+logging.basicConfig(format=LOGGING_FORMAT)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -26,16 +26,14 @@ def validate_signature(data, secret, headers):
     return hmac.compare_digest(signature, computed_sign)
 
 
-def run_cmd(cmd, bot, chat_id, host_name):
+def run_cmd(cmd, silent=True):
     logger.debug(f"Running {cmd}")
     process = subprocess.Popen(cmd.split(" "), stdout=subprocess.PIPE)
     output, error = process.communicate()
     if error:
         logger.warning(f"Error: {error}")
-        bot.send_message(
-            chat_id=chat_id,
-            text=f"[{host_name}] Error while trying to pull new changes from github {error}"
-        ).to_json()
+        if not silent:
+            raise ValueError(error)
         return
     logger.debug(f"Output: {output}")
     return output
@@ -56,7 +54,8 @@ async def add_item(request: Request):
             text=f"[{host_name}] Got bad signature in request"
         )
 
-    output = run_cmd("git pull", bot, chat_id, host_name)
+    logger.info("Got new updates")
+    output = run_cmd("git pull")
     if not output:
         return bot.send_message(chat_id=chat_id, text=f"[{host_name}] Error at git pull")
     if output == b'Already up to date.\n':
@@ -64,10 +63,8 @@ async def add_item(request: Request):
             chat_id=chat_id,
             text=f"[{host_name}] No changes detected at git pull."
         )
-    if run_cmd("systemctl restart reddit.service", bot, config["DEBUG_CHAT_ID"], host_name):
-        return bot.send_message(chat_id=chat_id, text=f"[{host_name}] Reddit deployed successfully")
-
-    return ""
+    run_cmd("/usr/bin/systemctl restart reddit.service")
+    return bot.send_message(chat_id=chat_id, text=f"[{host_name}] Reddit deployed successfully")
 
 
 def start():

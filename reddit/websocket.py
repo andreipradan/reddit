@@ -10,7 +10,9 @@ import requests
 import telegram
 import websockets
 
-logging.basicConfig(format="%(asctime)s - %(levelname)s:%(name)s - %(message)s")
+from reddit.settings import LOGGING_FORMAT
+
+logging.basicConfig(format=LOGGING_FORMAT)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 

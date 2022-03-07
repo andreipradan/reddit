@@ -21,8 +21,7 @@ def cd_setup():
     logger.info(output)
     start_services()
     github_hook.set_url()
-    logger.info("Completed setup, showing logs. CTRL+C to terminate")
-    show_logs()
+    logger.info("Completed setup! >> ./raspberry_py/scripts/show-logs.sh")
 
 
 def start_services():
@@ -31,6 +30,3 @@ def start_services():
         raise ValueError("Could not start services")
     logger.info(output)
 
-
-def show_logs():
-    run_cmd("./raspberry_pi/scripts/show-logs.sh", silent=False)

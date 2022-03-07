@@ -1,1 +1,1 @@
-journalctl --follow _SYSTEMD_UNIT=fastapi.service + _SYSTEMD_UNIT=ngrok.service + _SYSTEMD_UNIT=reddit.service
+journalctl --follow -o cat -u fastapi.service -u ngrok.service -u reddit.service

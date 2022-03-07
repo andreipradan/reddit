@@ -5,6 +5,7 @@ Description=Ngrok public URL service
 User=pi
 WorkingDirectory=/home/pi/projects/reddit
 ExecStart=ngrok http 7777
+ExecStartPost=/home/pi/.poetry/bin/poetry run set-hook
 Restart=always
 
 [Install]

@@ -41,13 +41,12 @@ def set_url():
         "active": True,
     }
     repository = g.get_repo(f"{user}/{repo}")
-    try:
-        logger.info("Creating new web hook")
-        hook = repository.create_hook(**hook_config)
-    except github.GithubException as e:
-        hooks = repository.get_hooks()
-        logger.warning(f"Hook already exists: {e}\nDeleting all hooks [{hooks.totalCount}]")
-        for hook in hooks:
-            hook.delete()
-        hook = repository.create_hook(**hook_config)
+    hooks = repository.get_hooks()
+
+    logger.warning(f"Deleting all hooks [{hooks.totalCount}]")
+    for hook in hooks:
+        hook.delete()
+
+    logger.info("Creating new web hook")
+    hook = repository.create_hook(**hook_config)
     logger.info(f"Web hook created successfully: {hook}")

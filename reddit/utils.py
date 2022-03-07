@@ -8,7 +8,7 @@ logger.setLevel(logging.DEBUG)
 
 
 def validate_signature(data, secret, headers):
-    sig_header = 'X-Hub-Signature-256'
+    sig_header = "X-Hub-Signature-256"
     if sig_header not in headers:
         return False
     computed_sign = hmac.new(secret.encode("utf-8"), data, hashlib.sha256).hexdigest()
@@ -21,12 +21,11 @@ def run_cmd(cmd, silent=True):
     process = subprocess.Popen(cmd.split(" "), stdout=subprocess.PIPE)
     output, error = process.communicate()
     if error:
-        logger.warning(f"Error: {error}")
         if not silent:
             raise ValueError(error)
-        return
+        return logger.warning(f"Error: {error}")
 
     logger.debug(f"Output: {output}")
     if not (silent or output):
-        raise ValueError(f"No output from running '{cmd}' [silent={silent} Output: {output}]")
+        raise ValueError(f"No output from running: '{cmd}'")
     return output

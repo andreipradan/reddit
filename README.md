@@ -10,10 +10,10 @@ poetry run websocket  # starting the websocket
 ```
 
 ### Local automatic deployments on raspberry pi
-`sudo raspberry-pi/setup-continuous-deployment.sh`
+`poetry run full-setup`
 
 What happens in the background:
-1. Copies the reddit, ngrok and fastapi service files from /raspberry-pi into /etc/systemd/system
+1. Copies the reddit, ngrok and fastapi service files from /deploy/services into /etc/systemd/system
 2. Reloads the service files to include the new services.
 3. Starts the new services
 

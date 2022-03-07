@@ -26,7 +26,7 @@ host_name = socket.gethostname()
 
 def get_socket_url():
     logger.debug("Fetching socket url...")
-    response = requests.get(config["INFO_URL"], headers={'User-agent': 'reddit-live-telegram-bot'})
+    response = requests.get(config["INFO_URL"], headers={"User-agent": "reddit-live"})
     if response.status_code == 429:
         return logger.error(f"Got 429: {response.json()['message']}")
 
@@ -43,20 +43,18 @@ def handle_sigterm(*_):
 
 
 async def websocket(socket_url):
-    async with websockets.connect(socket_url) as socket:
-        logger.info("Connected to live thread!")
+    async with websockets.connect(socket_url) as ws:
         last_payload, last_update = None, None
         while True:
-            response = json.loads(await socket.recv())
-            response_type = response['type']
-            logger.debug(f"Got a new '{response_type}'")
-            if response_type == "update":
+            response = json.loads(await ws.recv())
+            if response["type"] == "update":
                 body = response["payload"]["data"]["body"]
                 if last_update != body:
-                    logger.info(body)
                     last_update = body
-                    bot.send_message(chat_id=chat_id, text=body, disable_notification=True)
-            elif response_type == "complete":
+                    bot.send_message(
+                        chat_id=chat_id, text=body, disable_notification=True
+                    )
+            elif response["type"] == "complete":
                 text = "This thread is done. No more updates"
                 logger.warning(text)
                 bot.send_message(chat_id=chat_id, text=text, disable_notification=True)
@@ -67,7 +65,9 @@ def start():
     signal.signal(signal.SIGTERM, handle_sigterm)
     socket_url = get_socket_url()
     if not socket_url:
-        return bot.send_message(chat_id=debug_chat_id, text="Could not fetch web socket URL")
+        return bot.send_message(
+            chat_id=debug_chat_id, text="Could not fetch web socket URL"
+        )
 
     bot.send_message(chat_id=debug_chat_id, text=f"[{host_name}] Socket started")
     try:

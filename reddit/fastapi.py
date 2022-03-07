@@ -22,31 +22,31 @@ async def add_item(request: Request):
     chat_id = config["DEBUG_CHAT_ID"]
     host_name = socket.gethostname()
 
-    if not validate_signature(await request.body(), config["GITHUB_SECRET"], request.headers):
-        logger.error(f"Invalid signature")
-        bot.send_message(
-            chat_id=chat_id,
-            text=f"[{host_name}] Got bad signature in request"
+    if not validate_signature(
+        await request.body(), config["GITHUB_SECRET"], request.headers
+    ):
+        bot.send_message(chat_id=chat_id, text=f"[{host_name}] Invalid hook signature")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid signature"
         )
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid signature")
 
-    logger.info("Got new updates")
-    output = run_cmd("git pull")
+    output = run_cmd("git reset --hard origin/main")
     if not output:
-        return bot.send_message(chat_id=chat_id, text=f"[{host_name}] Could not git pull")
-    if output.strip() == b'Already up to date.':
         return bot.send_message(
-            chat_id=chat_id,
-            text=f"[{host_name}] [git pull] No changes detected"
+            chat_id=chat_id, text=f"[{host_name}] Could not git pull"
         )
-    run_cmd("/usr/bin/systemctl restart reddit.service")
-    return bot.send_message(chat_id=chat_id, text=f"[{host_name}] Reddit deployed successfully")
+    if output.strip() == b"Already up to date.":
+        return bot.send_message(
+            chat_id=chat_id, text=f"[{host_name}] [git pull] No new changes"
+        )
+    if output.strip().startswith(b"CONFLICT"):
+        return bot.send_message(chat_id=chat_id, text=f"[{host_name}] [git pull] Conflict")
+
+    run_cmd("sudo /usr/bin/systemctl restart reddit")
+    return bot.send_message(
+        chat_id=chat_id, text=f"[{host_name}] Reddit deployed successfully"
+    )
 
 
 def start():
-    uvicorn.run(
-        "reddit.fastapi:app",
-        host="0.0.0.0",
-        port=7777,
-        reload=True
-    )
+    uvicorn.run("reddit.fastapi:app", port=7777, reload=True)

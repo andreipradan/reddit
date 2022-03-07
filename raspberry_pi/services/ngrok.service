@@ -1,5 +1,6 @@
 [Unit]
 Description=Ngrok public URL service
+After=fastapi.service
 
 [Service]
 User=pi

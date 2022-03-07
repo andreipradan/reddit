@@ -11,22 +11,13 @@ logger.setLevel(logging.DEBUG)
 
 def cd_setup():
     permissions = "pi ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart reddit.service"
-    output = run_cmd(f'echo "{permissions}" >> /etc/sudoers.d/pi', silent=False)
-    if not output:
-        raise ValueError("Could not copy permissions to sudoers.d/pi")
-    logger.info(output)
-    output = run_cmd("sudo ./raspberry_pi/scripts/copy-services.sh", silent=False)
-    if not output:
-        raise ValueError("Could not copy services to systemd")
-    logger.info(output)
+    run_cmd(f'echo "{permissions}" >> /etc/sudoers.d/pi', silent=False)
+    run_cmd("sudo ./raspberry_pi/scripts/copy-services.sh", silent=False)
     start_services()
     github_hook.set_url()
     logger.info("Completed setup! >> ./raspberry_py/scripts/show-logs.sh")
 
 
 def start_services():
-    output = run_cmd("sudo ./raspberry_pi/scripts/start-services.sh", silent=False)
-    if not output:
-        raise ValueError("Could not start services")
-    logger.info(output)
+    run_cmd("sudo ./raspberry_pi/scripts/start-services.sh", silent=False)
 

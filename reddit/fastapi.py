@@ -33,11 +33,11 @@ async def add_item(request: Request):
     logger.info("Got new updates")
     output = run_cmd("git pull")
     if not output:
-        return bot.send_message(chat_id=chat_id, text=f"[{host_name}] Error at git pull")
-    if output == b'Already up to date.\n':
+        return bot.send_message(chat_id=chat_id, text=f"[{host_name}] Could not git pull")
+    if output.strip() == b'Already up to date.':
         return bot.send_message(
             chat_id=chat_id,
-            text=f"[{host_name}] No changes detected at git pull."
+            text=f"[{host_name}] [git pull] No changes detected"
         )
     run_cmd("/usr/bin/systemctl restart reddit.service")
     return bot.send_message(chat_id=chat_id, text=f"[{host_name}] Reddit deployed successfully")

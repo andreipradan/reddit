@@ -1,6 +1,5 @@
 #!/bin/bash
 set -euo
 systemctl daemon-reload
-systemctl start fastapi.service
-systemctl start ngrok.service
-systemctl start reddit.service
+systemctl start fastapi.service ngrok.service reddit.service
+systemctl enable fastapi.service ngrok.service reddit.service

@@ -25,5 +25,8 @@ def run_cmd(cmd, silent=True):
         if not silent:
             raise ValueError(error)
         return
+
     logger.debug(f"Output: {output}")
+    if not (silent and output):
+        raise ValueError(f"No output from running '{cmd}'")
     return output

@@ -1,8 +1,8 @@
 import logging
 
-from reddit.fastapi import run_cmd
 from raspberry_pi import github_hook
 from reddit.settings import LOGGING_FORMAT
+from reddit.utils import run_cmd
 
 logging.basicConfig(format=LOGGING_FORMAT)
 logger = logging.getLogger(__name__)

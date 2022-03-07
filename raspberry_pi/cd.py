@@ -20,4 +20,3 @@ def cd_setup():
 
 def start_services():
     run_cmd("sudo ./raspberry_pi/scripts/start-services.sh", silent=False)
-

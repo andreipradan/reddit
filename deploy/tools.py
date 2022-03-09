@@ -50,7 +50,7 @@ def get_ngrok_url():
 
 
 def start_services():
-    run_cmd("sudo systemctl start fastapi.service ngrok.service reddit.service")
+    run_cmd("sudo systemctl restart fastapi.service ngrok.service reddit.service")
 
 
 def set_url():

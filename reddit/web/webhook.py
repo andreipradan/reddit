@@ -43,6 +43,7 @@ async def process_github_webhook(request: Request):
         )
 
     run_cmd("sudo /usr/bin/systemctl restart reddit")
+    run_cmd("sudo /usr/bin/systemctl restart fastapi")
     return bot.send_message(
         chat_id=chat_id, text=f"[{host_name}] Reddit deployed successfully"
     )

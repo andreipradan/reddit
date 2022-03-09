@@ -30,7 +30,7 @@ async def add_item(request: Request):
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid signature"
         )
 
-    output = run_cmd("git reset --hard origin/main")
+    output = run_cmd("git pull origin main")
     if not output:
         return bot.send_message(
             chat_id=chat_id, text=f"[{host_name}] Could not git pull"

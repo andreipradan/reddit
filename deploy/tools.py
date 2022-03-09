@@ -24,7 +24,7 @@ def copy_services():
 
 def full_setup():
     permissions = "pi ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart reddit"
-    run_cmd(f'echo "{permissions}" >> /etc/sudoers.d/pi', silent=False)
+    run_cmd(f'echo "{permissions}" > /etc/sudoers.d/pi', silent=False)
     copy_services()
     run_cmd("sudo systemctl daemon-reload")
     start_services()

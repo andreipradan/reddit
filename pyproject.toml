@@ -13,6 +13,7 @@ python-dotenv = "^0.19.2"
 fastapi = "^0.75.0"
 uvicorn = {version = "^0.17.5", extras = ["standard"]}
 PyGithub = "^1.55"
+pre-commit = "^2.17.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
@@ -22,7 +23,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-fastapi = 'reddit.fastapi:start'
+fastapi = 'reddit.web.main:start'
 full-setup = 'deploy.tools:full_setup'
 set-hook = 'deploy.tools:set_url'
 start-services = 'deploy.tools:start_services'

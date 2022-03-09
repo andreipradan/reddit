@@ -3,20 +3,18 @@ import socket
 
 import dotenv
 import telegram
-import uvicorn
-from fastapi import FastAPI, status, Request, HTTPException
+from fastapi import APIRouter, status, Request, HTTPException
 
-from reddit.settings import LOGGING_FORMAT
 from reddit.utils import validate_signature, run_cmd
 
-app = FastAPI()
-logging.basicConfig(format=LOGGING_FORMAT)
+router = APIRouter()
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-@app.post("/github/", status_code=status.HTTP_201_CREATED)
-async def add_item(request: Request):
+@router.post("/github/", status_code=status.HTTP_200_OK)
+async def process_github_webhook(request: Request):
     config = dotenv.dotenv_values()
     bot = telegram.Bot(token=config["TOKEN"])
     chat_id = config["DEBUG_CHAT_ID"]
@@ -40,13 +38,11 @@ async def add_item(request: Request):
             chat_id=chat_id, text=f"[{host_name}] [git pull] No new changes"
         )
     if output.strip().startswith(b"CONFLICT"):
-        return bot.send_message(chat_id=chat_id, text=f"[{host_name}] [git pull] Conflict")
+        return bot.send_message(
+            chat_id=chat_id, text=f"[{host_name}] [git pull] Conflict"
+        )
 
     run_cmd("sudo /usr/bin/systemctl restart reddit")
     return bot.send_message(
         chat_id=chat_id, text=f"[{host_name}] Reddit deployed successfully"
     )
-
-
-def start():
-    uvicorn.run("reddit.fastapi:app", port=7777, reload=True)

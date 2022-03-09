@@ -4,6 +4,7 @@ from pathlib import Path
 import dotenv
 import github
 import requests
+import telegram
 from requests.exceptions import ConnectionError
 
 from reddit.settings import LOGGING_FORMAT
@@ -49,16 +50,16 @@ def get_ngrok_url():
 
 def start_services():
     run_cmd("sudo systemctl start fastapi.service ngrok.service reddit.service")
-    set_url()
 
 
 def set_url():
     env = dotenv.dotenv_values()
+    ngrok_url = get_ngrok_url()
     g = github.Github(env["GITHUB_ACCESS_TOKEN"])
     hook_config = {
         "name": "web",
         "config": {
-            "url": f"{get_ngrok_url()}/github/",
+            "url": f"{ngrok_url}/github/",
             "content_type": "json",
             "secret": env["GITHUB_SECRET"],
         },
@@ -73,4 +74,6 @@ def set_url():
         hook.delete()
 
     hook = repository.create_hook(**hook_config)
-    logger.info(f"Web hook created successfully: {hook}")
+    logger.info(f"Github web hook created successfully: {hook}")
+    bot = telegram.Bot(token=env["TOKEN"])
+    logger.info(f"Set telegram webhook: {bot.set_webhook(f'{ngrok_url}/telegram/')}")

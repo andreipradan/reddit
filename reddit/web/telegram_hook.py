@@ -1,4 +1,5 @@
 import logging
+import os
 
 import dotenv
 import six
@@ -15,6 +16,9 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+config = dotenv.dotenv_values()
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = config["GOOGLE_APPLICATION_CREDENTIALS"]
+
 
 @router.post("/telegram/", status_code=status.HTTP_200_OK)
 async def process_telegram_webhook(request: Request):
@@ -23,7 +27,6 @@ async def process_telegram_webhook(request: Request):
         logging.warning("Got no json")
         return ""
 
-    config = dotenv.dotenv_values()
     whitelist = config["WHITELIST"].split(",") + ["andreierdna"]
     bot = telegram.Bot(token=config["TOKEN"])
 

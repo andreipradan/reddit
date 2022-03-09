@@ -24,6 +24,7 @@ def copy_services():
 
 
 def full_setup():
+    run_cmd("/home/pi/.poetry/bin/poetry install")
     permissions = "pi ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart reddit"
     run_cmd(f'echo "{permissions}" > /etc/sudoers.d/pi', silent=False)
     copy_services()

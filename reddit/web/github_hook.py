@@ -42,8 +42,7 @@ async def process_github_webhook(request: Request):
             chat_id=chat_id, text=f"[{host_name}] [git pull] Conflict"
         )
 
-    run_cmd("sudo /usr/bin/systemctl restart reddit")
-    run_cmd("sudo /usr/bin/systemctl restart fastapi")
+    run_cmd("/home/pi/.poetry/bin/poetry run full-setup")
     return bot.send_message(
         chat_id=chat_id, text=f"[{host_name}] Reddit deployed successfully"
     )

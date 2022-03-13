@@ -4,9 +4,7 @@ Description=FastAPI server
 [Service]
 User=pi
 WorkingDirectory=/home/pi/projects/reddit
-EnvironmentFile=/home/pi/projects/reddit/.env
-ExecStart=source "$( poetry env info --path )/bin/activate" \
-    && newrelic-admin run-program /home/pi/.poetry/bin/poetry run fastapi
+ExecStart=/home/pi/.poetry/bin/poetry run fastapi
 Restart=always
 
 [Install]

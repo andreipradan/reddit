@@ -8,6 +8,7 @@ from google.api_core.exceptions import GoogleAPICallError
 from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import exceptions
 from google.cloud import translate_v2 as translate
+from sentry_sdk import start_transaction
 
 from fastapi import APIRouter, status, Request
 
@@ -55,10 +56,11 @@ async def process_telegram_webhook(request: Request):
     text_size = len(text)
     if text_size > text_max_size:
         logging.warning(f"Exceeded {text_max_size} characters: {text_max_size}")
-        return bot.send_message(
-            chat_id=message.chat_id,
-            text=f"Too many characters. Try sending less than {text_max_size} characters",
-        ).to_json()
+        with start_transaction(op="telegram", name="too_many_chars"):
+            return bot.send_message(
+                chat_id=message.chat_id,
+                text=f"Too many characters. Try sending less than {text_max_size} characters",
+            ).to_json()
 
     if not text.strip():
         logging.warning(f"No text after stripping: {text}")
@@ -72,14 +74,17 @@ async def process_telegram_webhook(request: Request):
     except DefaultCredentialsError as e:
         logging.error(e)
         return ""
-    try:
-        result = translate_client.translate(text, target_language="en", format_="text")
-    except (GoogleAPICallError, exceptions.BadRequest) as e:
-        logging.error(e)
-        return "Something went wrong. For usage and examples type '/translate help'."
+
+    with start_transaction(op="telegram", name="Translate with Google"):
+        try:
+            result = translate_client.translate(text, target_language="en", format_="text")
+        except (GoogleAPICallError, exceptions.BadRequest) as e:
+            logging.error(e)
+            return "Something went wrong. For usage and examples type '/translate help'."
 
     detected_language = result["detectedSourceLanguage"] or ""
-    return bot.send_message(
-        chat_id=message.chat_id,
-        text=f"[{detected_language}] {result['translatedText']}",
-    ).to_json()
+    with start_transaction(op="telegram", name="Send translation on telegram"):
+        return bot.send_message(
+            chat_id=message.chat_id,
+            text=f"[{detected_language}] {result['translatedText']}",
+        ).to_json()

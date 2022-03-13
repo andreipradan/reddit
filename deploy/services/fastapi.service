@@ -4,8 +4,7 @@ Description=FastAPI server
 [Service]
 User=pi
 WorkingDirectory=/home/pi/projects/reddit
-Environment=poetry=/home/pi/.poetry/bin/poetry
-ExecStart=export $(grep -v '^#' .env | xargs) && poetry shell && newrelic-admin run-program poetry run fastapi
+ExecStart=/home/pi/.poetry/bin/poetry shell && export $(grep -v '^#' .env | xargs) && newrelic-admin run-program /home/pi/.poetry/bin/poetry run fastapi
 Restart=always
 
 [Install]

@@ -141,3 +141,7 @@ def check():
         logger.info(f"No updates")
 
     logger.info("Done")
+
+
+if __name__ == "__main__":
+    check()

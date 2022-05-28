@@ -79,7 +79,7 @@ async def process_telegram_webhook(request: Request):
                 logging.error(e)
                 return "Something went wrong. For usage and examples type '/translate help'."
             detected_language = result["detectedSourceLanguage"] or "-"
-            span.set_tag("detected_langualge", detected_language)
+            span.set_tag("detected_language", detected_language)
 
         with start_span(op="telegram", description="Send translation on telegram"):
             return bot.send_message(

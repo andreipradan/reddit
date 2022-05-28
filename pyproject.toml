@@ -16,6 +16,8 @@ PyGithub = "^1.55"
 pre-commit = "^2.17.0"
 google-cloud-translate = "^3.7.2"
 sentry-sdk = "^1.5.7"
+pymongo = "^4.1.1"
+dnspython = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
@@ -25,6 +27,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
+challonge = 'reddit.bots.challonge:check'
 fastapi = 'reddit.web.main:start'
 full-setup = 'deploy.tools:full_setup'
 set-hook = 'deploy.tools:set_url'

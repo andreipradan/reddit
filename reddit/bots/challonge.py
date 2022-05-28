@@ -1,6 +1,7 @@
 import json
 import logging
 from datetime import datetime
+from time import sleep
 from urllib.request import Request, HTTPBasicAuthHandler, build_opener
 
 import dotenv
@@ -9,6 +10,7 @@ import telegram
 
 from reddit.bots.database import set_stats, bulk_update, filter_by_ids
 from reddit.settings import LOGGING_FORMAT
+from reddit.websocket import handle_sigterm
 
 config = dotenv.dotenv_values()
 
@@ -101,7 +103,7 @@ class Client:
     def parse_updates(self, items):
         items = "\n\n".join([self.parse_update(u) for u in items])
         return (
-            "<b>Hi, these are the new updates:</b>"
+            "<b>New updates</b>"
             f"\n\n{items}"
             f"\n\n<a href='https://challonge.com/{self.tournament_id}'>"
             f"Tournament page"
@@ -143,5 +145,9 @@ def check():
     logger.info("Done")
 
 
-if __name__ == "__main__":
-    check()
+def run_forever():
+    try:
+        check()
+        sleep(60)
+    except KeyboardInterrupt:
+        handle_sigterm()

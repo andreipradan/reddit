@@ -1,0 +1,11 @@
+[Unit]
+Description=Polling Challonge API for updates
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/projects/reddit
+ExecStart=/home/pi/.poetry/bin/poetry run challonge
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

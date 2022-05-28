@@ -30,7 +30,7 @@ def full_setup():
     copy_services()
     run_cmd("sudo systemctl daemon-reload")
     start_services()
-    run_cmd("sudo systemctl enable fastapi.service ngrok.service reddit.service")
+    run_cmd("sudo systemctl enable challonge.service fastapi.service ngrok.service reddit.service")
     logger.info("Completed setup! >> ./deploy/show-logs.sh")
 
 
@@ -50,7 +50,7 @@ def get_ngrok_url():
 
 
 def start_services():
-    run_cmd("sudo systemctl restart fastapi ngrok reddit")
+    run_cmd("sudo systemctl restart challonge fastapi ngrok reddit")
 
 
 def set_url():

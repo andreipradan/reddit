@@ -28,7 +28,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-challonge = 'reddit.bots.challonge:check'
+challonge = 'reddit.bots.challonge:run_forever'
 fastapi = 'reddit.web.main:start'
 full-setup = 'deploy.tools:full_setup'
 set-hook = 'deploy.tools:set_url'

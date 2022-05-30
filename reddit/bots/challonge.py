@@ -146,8 +146,9 @@ def check():
 
 
 def run_forever():
-    try:
-        check()
-        sleep(60)
-    except KeyboardInterrupt:
-        handle_sigterm()
+    while True:
+        try:
+            check()
+            sleep(60)
+        except KeyboardInterrupt:
+            handle_sigterm()

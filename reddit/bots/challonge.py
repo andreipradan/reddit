@@ -82,7 +82,7 @@ class Client:
             return f"Score: {update_value.replace('-', ':')}"
         if update_field in ["underway_at", "started_at", "completed_at"]:
             verbose = convert_to_timezone(update_value, "Europe/Bucharest")
-            return f"{field_verbose}: {verbose} (± 5m)"
+            return f"{field_verbose}: {verbose}"
         if update_field in ["loser_id", "winner_id", "player1_id", "player2_id"]:
             field = update_field.split("_")[0].title()
             emoji = "💪" if update_field == "winner_id" else ""
@@ -133,16 +133,18 @@ def check():
 
     if updates:
         results = bulk_update(updates).bulk_api_result
-        bot.send_message(
-            chat_id=config["CHALLONGE_CHAT_ID"],
-            text=client.parse_updates(updates),
-            parse_mode=telegram.ParseMode.HTML
-        )
-        logger.debug(results)
-    else:
-        logger.info(f"No updates")
+        try:
+            bot.send_message(
+                chat_id=config["CHALLONGE_CHAT_ID"],
+                text=client.parse_updates(updates),
+                parse_mode=telegram.ParseMode.HTML
+            )
+        except telegram.error.BadRequest as e:
+            logger.error(f"Error sending telegram message: {e}")
+        finally:
+            return logger.debug(results)
 
-    logger.info("Done")
+    logger.info(f"No updates")
 
 
 def run_forever():

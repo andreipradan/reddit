@@ -80,7 +80,7 @@ class Client:
             return f"Cleared: {field_verbose}"
         if update_field == "scores_csv":
             return f"Score: {update_value.replace('-', ':')}"
-        if update_field in ["underway_at", "started_at", "completed_at"]:
+        if update_field in ["underway_at", "started_at", "completed_at", "started_at", "scheduled_time"]:
             verbose = convert_to_timezone(update_value, "Europe/Bucharest")
             return f"{field_verbose}: {verbose}"
         if update_field in ["loser_id", "winner_id", "player1_id", "player2_id"]:
@@ -124,6 +124,7 @@ def check():
         match["underway_at"] = convert_to_timezone(match["underway_at"])
         match["started_at"] = convert_to_timezone(match["started_at"])
         match["completed_at"] = convert_to_timezone(match["completed_at"])
+        match["scheduled_time"] = convert_to_timezone(match["scheduled_time"])
 
         db_match = db_matches.get(match['id'])
         if db_match and match.items() <= db_match.items():

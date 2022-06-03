@@ -27,7 +27,7 @@ def convert_to_timezone(datetime_string, tz="UTC"):
         dt = datetime.fromisoformat(datetime_string).astimezone(pytz.timezone(tz))
         if tz == "UTC":
             return dt.isoformat()
-        return dt.strftime("%Y-%m-%d %H:%M:%S")
+        return dt.strftime("%Y-%m-%d %H:%M")
 
 
 class Client:

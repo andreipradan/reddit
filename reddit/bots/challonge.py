@@ -20,6 +20,8 @@ logging.basicConfig(format=LOGGING_FORMAT)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+TIME_ZONE = "Europe/Bucharest"
+
 
 def convert_to_timezone(datetime_string, tz="UTC"):
     if datetime_string:
@@ -28,6 +30,19 @@ def convert_to_timezone(datetime_string, tz="UTC"):
         if tz == "UTC":
             return dt.isoformat()
         return dt.strftime("%Y-%m-%d %H:%M")
+
+
+def send_message(text):
+    try:
+        bot.send_message(
+            chat_id=config["CHALLONGE_CHAT_ID"],
+            disable_notification=True,
+            disable_web_page_preview=True,
+            parse_mode=telegram.ParseMode.HTML,
+            text=text,
+        )
+    except telegram.error.BadRequest as e:
+        logger.error(f"Error sending telegram message: {e}")
 
 
 class Client:
@@ -81,7 +96,7 @@ class Client:
         if update_field == "scores_csv":
             return f"Score: {update_value.replace('-', ':')}"
         if update_field in ["underway_at", "started_at", "completed_at", "started_at", "scheduled_time"]:
-            verbose = convert_to_timezone(update_value, "Europe/Bucharest")
+            verbose = convert_to_timezone(update_value, TIME_ZONE)
             return f"{field_verbose}: {verbose}"
         if update_field in ["loser_id", "winner_id", "player1_id", "player2_id"]:
             field = update_field.split("_")[0].title()
@@ -91,8 +106,8 @@ class Client:
 
     def parse_update(self, update):
         match_id = update._filter['id']
-        match_name = f"{self.get_players_from_match_id(match_id)} [Round {self.matches[match_id]['round']}]"
-        match_title = f"<b>{match_name}</b>"
+        players = self.get_players_from_match_id(match_id)
+        match_title = f"<b>{players} [Round {self.matches[match_id]['round']}]</b>"
         match_updates = {
             k: v for k, v in update._doc["$set"].items() if k != "updated_at"
         }
@@ -115,10 +130,12 @@ def check():
     client = Client(tournament_id=config["CHALLONGE_DATABASE_NAME"])
     client.fetch()
 
+    check_open_matches(client)
+
     db_matches = {m['id']: m for m in filter_by_ids(list(client.matches))}
 
     updates = []
-    for _id, match in client.matches.items():
+    for _, match in client.matches.items():
         match["created_at"] = convert_to_timezone(match["created_at"])
         match["updated_at"] = convert_to_timezone(match["updated_at"])
         match["underway_at"] = convert_to_timezone(match["underway_at"])
@@ -130,22 +147,40 @@ def check():
         if db_match and match.items() <= db_match.items():
             continue
         db_match = db_match or {}
-        updates.append(set_stats(dict(match.items() - db_match.items()), commit=False, id=match["id"]))
+        updates.append(set_stats(dict(match.items() - db_match.items()), False, id=match["id"]))
 
     if updates:
         results = bulk_update(updates).bulk_api_result
-        try:
-            bot.send_message(
-                chat_id=config["CHALLONGE_CHAT_ID"],
-                text=client.parse_updates(updates),
-                parse_mode=telegram.ParseMode.HTML
-            )
-        except telegram.error.BadRequest as e:
-            logger.error(f"Error sending telegram message: {e}")
-        finally:
-            return logger.debug(results)
+        send_message(client.parse_updates(updates))
+        return logger.debug(results)
 
-    logger.info(f"No updates")
+    logger.info(f"No matches updates")
+
+
+def check_open_matches(client):
+    now = datetime.now().astimezone(pytz.timezone("Europe/Bucharest"))
+    if (now.weekday(), now.astimezone(pytz.timezone(TIME_ZONE)).strftime("%H:%M")) != (3, "09:30"):
+        return
+
+    logger.info("Checking open matches")
+    open_matches = [m for _, m in client.matches.items() if m["state"] == "open"]
+    if open_matches:
+        matches = "\n".join([
+            f"{client.get_players_from_match_id(match['id'])} "
+            f"[Round {client.matches[match['id']]['round']}]"
+            for match in open_matches
+        ])
+        no_of_matches = len(open_matches)
+        text = (
+            f"<b>Neața, {no_of_matches} meci{'uri' if no_of_matches > 1 else ''} se "
+            f"{'pot' if no_of_matches > 1 else 'poate'} juca:</b>"
+            f"\n\n{matches}"
+            "\n\nWeekend fain!"
+        )
+        send_message(text)
+        logger.info(f"Found {no_of_matches} open matches")
+    else:
+        logger.info("No matches open")
 
 
 def run_forever():

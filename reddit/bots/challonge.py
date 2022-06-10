@@ -159,7 +159,7 @@ def check():
 
 def check_open_matches(client):
     now = datetime.now().astimezone(pytz.timezone("Europe/Bucharest"))
-    if (now.weekday(), now.astimezone(pytz.timezone(TIME_ZONE)).strftime("%H:%M")) != (3, "09:30"):
+    if (now.weekday(), now.astimezone(pytz.timezone(TIME_ZONE)).strftime("%H:%M")) != (4, "12:00"):
         return
 
     logger.info("Checking open matches")
@@ -172,7 +172,7 @@ def check_open_matches(client):
         ])
         no_of_matches = len(open_matches)
         text = (
-            f"<b>Neața, {no_of_matches} meci{'uri' if no_of_matches > 1 else ''} se "
+            f"<b>Salutare, {no_of_matches} meci{'uri' if no_of_matches > 1 else ''} se "
             f"{'pot' if no_of_matches > 1 else 'poate'} juca:</b>"
             f"\n\n{matches}"
             "\n\nWeekend fain!"

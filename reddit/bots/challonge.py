@@ -66,7 +66,7 @@ class Client:
         return self._get_related("participant")
 
     def fetch(self):
-        req = Request(self.url)
+        req = Request(self.url, headers={'User-Agent': 'Mozilla/5.0'})
         req.get_method = lambda: "GET"
         auth_handler = HTTPBasicAuthHandler()
         auth_handler.add_password(

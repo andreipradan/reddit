@@ -159,7 +159,7 @@ def check():
 
 def check_open_matches(client):
     now = datetime.now().astimezone(pytz.timezone("Europe/Bucharest"))
-    if (now.weekday(), now.astimezone(pytz.timezone(TIME_ZONE)).strftime("%H:%M")) != (4, "12:00"):
+    if (now.weekday(), now.astimezone(pytz.timezone(TIME_ZONE)).strftime("%H:%M")) != (4, "15:30"):
         return
 
     logger.info("Checking open matches")
